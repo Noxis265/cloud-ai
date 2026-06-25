@@ -17,18 +17,31 @@
     <div id="chat-window"><div class="message">Привет! Чем могу помочь?</div></div>
     <div id="input-area">
         <input id="user-input" placeholder="Введите ваш запрос...">
-        <button id="send-btn">Отправить</button>
+        <button onclick="sendMessage()">Отправить</button>
     </div>
-
     <script>
-        const API_KEY = "GEMINI_KEY_PLACEHOLDER"; // Не меняй это!
-        
         async function sendMessage() {
             const input = document.getElementById('user-input');
+            const chat = document.getElementById('chat-window');
             const text = input.value.trim();
             if (!text) return;
             
-            // ... (дальнейшая логика fetch к Google AI Studio напрямую)
+            chat.innerHTML += `<div class="message user-msg">${text}</div>`;
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                const data = await response.json();
+                if (data.candidates) {
+                    chat.innerHTML += `<div class="message">${data.candidates[0].content.parts[0].text}</div>`;
+                }
+            } catch (e) {
+                console.error(e);
+            }
         }
     </script>
 </body>
