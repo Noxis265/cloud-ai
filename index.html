@@ -2,14 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>CloudAI - Глобальный ИИ</title>
+    <title>CloudAI</title>
     <style>
         body { margin: 0; background: #0b0f19; color: #e2e8f0; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
         #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         .message { padding: 12px 18px; border-radius: 18px; max-width: 75%; background: #2d3748; }
         .user-msg { background: #3b82f6; align-self: flex-end; }
         #input-area { padding: 20px; background: #111827; display: flex; gap: 10px; }
-        input { flex: 1; padding: 14px; border-radius: 10px; border: 1px solid #374151; background: #1f2937; color: white; }
+        input { flex: 1; padding: 14px; border-radius: 10px; border: 1px solid #374151; background: #1f2937; color: white; outline: none; }
         button { padding: 10px 20px; border-radius: 10px; background: #3b82f6; border: none; color: white; cursor: pointer; }
     </style>
 </head>
@@ -17,23 +17,42 @@
     <div id="chat-window"><div class="message">Привет! Чем я могу помочь сегодня?</div></div>
     <div id="input-area">
         <input id="user-input" placeholder="Введите ваш запрос...">
-        <button onclick="sendMessage()">Отправить</button>
+        <button id="send-btn" onclick="sendMessage()">Отправить</button>
     </div>
+
     <script>
         async function sendMessage() {
             const input = document.getElementById('user-input');
+            const chat = document.getElementById('chat-window');
             const text = input.value.trim();
             if (!text) return;
-            // Отправляем запрос на наш сервер Vercel
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text })
-            });
-            const data = await response.json();
-            if (data.candidates) {
-                document.getElementById('chat-window').innerHTML += `<div class="message">${data.candidates[0].content.parts[0].text}</div>`;
+
+            // Добавляем сообщение пользователя
+            chat.innerHTML += `<div class="message user-msg">${text}</div>`;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                // Запрос к твоему серверу /api/chat
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+
+                const data = await response.json();
+                
+                // Проверка ответа и вывод ИИ
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const aiText = data.candidates[0].content.parts[0].text;
+                    chat.innerHTML += `<div class="message">${aiText}</div>`;
+                } else {
+                    chat.innerHTML += `<div class="message" style="color: #f87171;">Ошибка ИИ: ${JSON.stringify(data)}</div>`;
+                }
+            } catch (e) {
+                chat.innerHTML += `<div class="message" style="color: #f87171;">Ошибка сети: ${e.message}</div>`;
             }
+            chat.scrollTop = chat.scrollHeight;
         }
     </script>
 </body>
