@@ -32,8 +32,8 @@
 
             const KEY = "AQ.Ab8RN6Jes3CxQODlLYw3wTy2rPngjn9TYVfvbmTGtpmxHprXyA";
             
-            // Сменили модель на gemini-1.5-pro
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${KEY}`;
+            // Используем gemini-1.0-pro (самая стабильная для API)
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${KEY}`;
             
             try {
                 const response = await fetch(url, {
@@ -44,10 +44,10 @@
 
                 const data = await response.json();
                 
-                if (data.candidates) {
+                if (data.candidates && data.candidates[0].content) {
                     chat.innerHTML += `<div class="message">${data.candidates[0].content.parts[0].text}</div>`;
                 } else {
-                    chat.innerHTML += `<div class="message" style="color:red">Ошибка: ${data.error?.message || 'Неизвестная ошибка'}</div>`;
+                    chat.innerHTML += `<div class="message" style="color:red">Ошибка API: ${data.error?.message || 'Неизвестная ошибка'}</div>`;
                 }
             } catch (e) {
                 chat.innerHTML += `<div class="message" style="color:red">Ошибка сети</div>`;
