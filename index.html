@@ -10,14 +10,14 @@
         .user-msg { background: #3b82f6; align-self: flex-end; }
         #input-area { padding: 20px; background: #111827; display: flex; gap: 10px; }
         input { flex: 1; padding: 14px; border-radius: 10px; border: 1px solid #374151; background: #1f2937; color: white; outline: none; }
-        button { padding: 10px 20px; border-radius: 10px; background: #3b82f6; border: none; color: white; cursor: pointer; }
+        button { padding: 10px 20px; border-radius: 10px; background: #3b82f6; border: none; color: white; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div id="chat-window"><div class="message">Привет! Чем я могу помочь сегодня?</div></div>
+    <div id="chat-window"><div class="message">Привет! Я готов. Напиши что-нибудь.</div></div>
     <div id="input-area">
-        <input id="user-input" placeholder="Введите ваш запрос...">
-        <button id="send-btn" onclick="sendMessage()">Отправить</button>
+        <input id="user-input" placeholder="Введите ваш запрос..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Отправить</button>
     </div>
 
     <script>
@@ -27,13 +27,13 @@
             const text = input.value.trim();
             if (!text) return;
 
-            // Добавляем сообщение пользователя
+            // Выводим сообщение пользователя
             chat.innerHTML += `<div class="message user-msg">${text}</div>`;
             input.value = '';
             chat.scrollTop = chat.scrollHeight;
 
             try {
-                // Запрос к твоему серверу /api/chat
+                // Запрос к серверу
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -42,15 +42,14 @@
 
                 const data = await response.json();
                 
-                // Проверка ответа и вывод ИИ
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                if (data.candidates && data.candidates[0].content) {
                     const aiText = data.candidates[0].content.parts[0].text;
                     chat.innerHTML += `<div class="message">${aiText}</div>`;
                 } else {
-                    chat.innerHTML += `<div class="message" style="color: #f87171;">Ошибка ИИ: ${JSON.stringify(data)}</div>`;
+                    chat.innerHTML += `<div class="message" style="color:red">Ошибка ответа ИИ</div>`;
                 }
             } catch (e) {
-                chat.innerHTML += `<div class="message" style="color: #f87171;">Ошибка сети: ${e.message}</div>`;
+                chat.innerHTML += `<div class="message" style="color:red">Ошибка сети: ${e.message}</div>`;
             }
             chat.scrollTop = chat.scrollHeight;
         }
