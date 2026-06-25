@@ -1,42 +1,23 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>CloudAI</title>
-    <style>
-        body { margin: 0; background: #0f172a; color: white; font-family: sans-serif; height: 100vh; display: flex; flex-direction: column; }
-        #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .message { padding: 15px; border-radius: 12px; max-width: 80%; background: #1e293b; border: 1px solid #334155; }
-        .user-msg { background: #3b82f6; align-self: flex-end; }
-        #input-area { padding: 20px; background: #1e293b; display: flex; gap: 10px; }
-        input { flex: 1; padding: 15px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; }
-        button { padding: 15px 25px; border-radius: 8px; background: #3b82f6; border: none; color: white; cursor: pointer; }
-    </style>
-</head>
+<html>
 <body>
-    <div id="chat-window"><div class="message">Привет! Введи запрос.</div></div>
-    <div id="input-area">
-        <input id="user-input" placeholder="Введите ваш запрос..." onkeydown="if(event.key==='Enter') sendMessage()">
-        <button onclick="sendMessage()">Отправить</button>
-    </div>
+    <div id="chat-window"></div>
+    <input id="user-input" type="text">
+    <button onclick="sendMessage()">Отправить</button>
 
     <script>
         async function sendMessage() {
             const input = document.getElementById('user-input');
             const chat = document.getElementById('chat-window');
-            const text = input.value.trim();
-            if (!text) return;
-
-            chat.innerHTML += `<div class="message user-msg">${text}</div>`;
+            const KEY = "AQ.Ab8RN6LUnf2fNaxOPHitySCZbLGfeEoxJAVFNcM5f5bQDgdDqw"; // Твой новый ключ
+            
+            const text = input.value;
+            chat.innerHTML += "<div>" + text + "</div>";
             input.value = '';
 
-            const KEY = "AQ.Ab8RN6Jes3CxQODlLYw3wTy2rPngjn9TYVfvbmTGtpmxHprXyA";
-            
-            // Используем gemini-1.0-pro (самая стабильная для API)
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent?key=${KEY}`;
-            
             try {
-                const response = await fetch(url, {
+                // Используем правильный endpoint
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
@@ -44,13 +25,14 @@
 
                 const data = await response.json();
                 
-                if (data.candidates && data.candidates[0].content) {
-                    chat.innerHTML += `<div class="message">${data.candidates[0].content.parts[0].text}</div>`;
+                if (data.candidates) {
+                    chat.innerHTML += "<div>" + data.candidates[0].content.parts[0].text + "</div>";
                 } else {
-                    chat.innerHTML += `<div class="message" style="color:red">Ошибка API: ${data.error?.message || 'Неизвестная ошибка'}</div>`;
+                    console.log(data); // Посмотри в консоль (F12), если опять ошибка
+                    chat.innerHTML += "<div style='color:red'>Ошибка: проверьте консоль</div>";
                 }
-            } catch (e) {
-                chat.innerHTML += `<div class="message" style="color:red">Ошибка сети</div>`;
+            } catch (error) {
+                chat.innerHTML += "<div style='color:red'>Ошибка сети</div>";
             }
         }
     </script>
