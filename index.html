@@ -16,7 +16,7 @@
 <body>
     <div id="chat-window"><div class="message">Привет! Введи запрос.</div></div>
     <div id="input-area">
-        <input id="user-input" placeholder="Введите ваш запрос...">
+        <input id="user-input" placeholder="Введите ваш запрос..." onkeydown="if(event.key==='Enter') sendMessage()">
         <button onclick="sendMessage()">Отправить</button>
     </div>
 
@@ -30,11 +30,13 @@
             chat.innerHTML += `<div class="message user-msg">${text}</div>`;
             input.value = '';
 
-            // ВСТАВЬ СЮДА НОВЫЙ КЛЮЧ ИЗ AI STUDIO
             const KEY = "AQ.Ab8RN6Jes3CxQODlLYw3wTy2rPngjn9TYVfvbmTGtpmxHprXyA";
             
+            // Сменили модель на gemini-1.5-pro
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${KEY}`;
+            
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
@@ -45,7 +47,6 @@
                 if (data.candidates) {
                     chat.innerHTML += `<div class="message">${data.candidates[0].content.parts[0].text}</div>`;
                 } else {
-                    console.error("Ошибка от Google:", data);
                     chat.innerHTML += `<div class="message" style="color:red">Ошибка: ${data.error?.message || 'Неизвестная ошибка'}</div>`;
                 }
             } catch (e) {
