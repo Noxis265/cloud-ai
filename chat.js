@@ -2,7 +2,8 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
   
   const { text } = req.body;
-  const KEY = process.env.GEMINI_API_KEY; // Ключ берется из настроек Vercel
+  // Ключ берется из защищенных переменных Vercel, он скрыт от всего мира
+  const KEY = process.env.GEMINI_API_KEY; 
 
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${KEY}`, {
