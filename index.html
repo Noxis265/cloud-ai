@@ -14,15 +14,15 @@
     </style>
 </head>
 <body>
-    <div id="chat-window"><div class="message">Привет! Введи ключ в консоли или убедись, что он верный.</div></div>
+    <div id="chat-window"><div class="message">Привет! Напиши что-нибудь.</div></div>
     <div id="input-area">
         <input id="user-input" placeholder="Введите ваш запрос...">
         <button id="send-btn">Отправить</button>
     </div>
 
     <script>
-        // ВСТАВЬ СЮДА СВОЙ КЛЮЧ
-        const API_KEY = "AQ.Ab8RN6IcTBDwNNydSE1_2s-UA4IzhSdEiED56p6FROBCxexEGA"; 
+        // ИСПОЛЬЗУЕМ ПЕРЕМЕННУЮ ОКРУЖЕНИЯ
+        const API_KEY = "ВАШ_КЛЮЧ_ИЗ_ПЕРЕМЕННЫХ_ОКРУЖЕНИЯ"; 
 
         document.getElementById('send-btn').addEventListener('click', async () => {
             const input = document.getElementById('user-input');
@@ -34,25 +34,28 @@
             input.value = '';
 
             try {
+                // ПРАВИЛЬНЫЙ ФОРМАТ ЗАПРОСА
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: text }] }]
+                        "contents": [{
+                            "parts": [{"text": text}]
+                        }]
                     })
                 });
 
                 const data = await response.json();
                 
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts) {
                     const aiText = data.candidates[0].content.parts[0].text;
                     chat.innerHTML += `<div class="message">${aiText}</div>`;
                 } else {
-                    console.error("Ответ API:", data);
-                    chat.innerHTML += `<div class="message" style="color:red">Ошибка: ${data.error ? data.error.message : 'Неизвестная ошибка'}</div>`;
+                    console.error("Полный ответ от API:", data);
+                    chat.innerHTML += `<div class="message" style="color:red">Ошибка API: ${data.error ? data.error.message : 'Неизвестно'}</div>`;
                 }
             } catch (e) {
-                chat.innerHTML += `<div class="message" style="color:red">Ошибка: ${e.message}</div>`;
+                chat.innerHTML += `<div class="message" style="color:red">Ошибка сети: ${e.message}</div>`;
             }
         });
     </script>
