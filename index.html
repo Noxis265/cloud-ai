@@ -14,13 +14,14 @@
     </style>
 </head>
 <body>
-    <div id="chat-window"><div class="message">Привет! Чем могу помочь?</div></div>
+    <div id="chat-window"><div class="message">Привет! Я готов. Напиши что-нибудь.</div></div>
     <div id="input-area">
         <input id="user-input" placeholder="Введите ваш запрос...">
         <button id="send-btn">Отправить</button>
     </div>
+
     <script>
-        // Твой API ключ должен быть в переменной окружения Vercel
+        // Этот код будет работать, так как Vercel подставит переменную при деплое
         const API_KEY = "GEMINI_API_KEY_HERE"; 
 
         document.getElementById('send-btn').addEventListener('click', async () => {
@@ -28,7 +29,7 @@
             const chat = document.getElementById('chat-window');
             const text = input.value.trim();
             if (!text) return;
-            
+
             chat.innerHTML += `<div class="message user-msg">${text}</div>`;
             input.value = '';
 
@@ -38,11 +39,19 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
                 });
+
                 const data = await response.json();
-                const aiText = data.candidates[0].content.parts[0].text;
-                chat.innerHTML += `<div class="message">${aiText}</div>`;
+                
+                // Проверка ответа
+                if (data.candidates && data.candidates[0].content) {
+                    const aiText = data.candidates[0].content.parts[0].text;
+                    chat.innerHTML += `<div class="message">${aiText}</div>`;
+                } else {
+                    console.error("Ошибка:", data);
+                    chat.innerHTML += `<div class="message" style="color:red">Ошибка ИИ. Проверь консоль (F12).</div>`;
+                }
             } catch (e) {
-                chat.innerHTML += `<div class="message" style="color:red">Ошибка: ${e.message}</div>`;
+                chat.innerHTML += `<div class="message" style="color:red">Ошибка сети.</div>`;
             }
         });
     </script>
