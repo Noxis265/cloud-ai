@@ -21,8 +21,8 @@
     </div>
 
     <script>
-        // Этот код будет работать, так как Vercel подставит переменную при деплое
-        const API_KEY = "GEMINI_API_KEY_HERE"; 
+        // Вставь свой ключ сюда ВРЕМЕННО для теста
+        const API_KEY = "ТВОЙ_КЛЮЧ_ЗДЕСЬ"; 
 
         document.getElementById('send-btn').addEventListener('click', async () => {
             const input = document.getElementById('user-input');
@@ -41,14 +41,13 @@
                 });
 
                 const data = await response.json();
+                console.log("Ответ от API:", data);
                 
-                // Проверка ответа
                 if (data.candidates && data.candidates[0].content) {
                     const aiText = data.candidates[0].content.parts[0].text;
                     chat.innerHTML += `<div class="message">${aiText}</div>`;
                 } else {
-                    console.error("Ошибка:", data);
-                    chat.innerHTML += `<div class="message" style="color:red">Ошибка ИИ. Проверь консоль (F12).</div>`;
+                    chat.innerHTML += `<div class="message" style="color:red">Ошибка. См. консоль.</div>`;
                 }
             } catch (e) {
                 chat.innerHTML += `<div class="message" style="color:red">Ошибка сети.</div>`;
